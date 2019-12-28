@@ -1,4 +1,0 @@
-# Pobox Bulk API Client in Go
-
-This is a small client for the Pobox Bulk Forwarding configuration API, written
-in Go.
