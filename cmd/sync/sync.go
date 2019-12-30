@@ -21,6 +21,7 @@ var (
 	maxCount = flag.Int("max", 100, "maximum changes to make in a single request")
 	authFile = flag.String("authfile", ".pobox-api-auth", "file containing auth secrets")
 	timeout  = flag.Duration("timeout", 5*time.Minute, "overall timeout")
+	delay    = flag.Duration("delay", 2*time.Second, "delay between modifications")
 )
 
 func main() {
@@ -70,6 +71,7 @@ func main() {
 		if err != nil {
 			glog.Fatalf("error setting routes: %v", err)
 		}
+		time.Sleep(*delay)
 	}
 	glog.Info("🙂")
 }
