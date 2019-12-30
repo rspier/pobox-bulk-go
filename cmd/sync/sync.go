@@ -46,7 +46,11 @@ func main() {
 	if err != nil {
 		glog.Exitf("error getting routes: %v", err)
 	}
-	glog.Infof("%d existing routes", len(have))
+	glog.Infof("%d total existing routes", len(have))
+
+	// API returns aliases for all domains covered by the same account.
+	have = filterToDomain(have, *domain)
+	glog.Infof("%d existing routes for @%s", len(have), *domain)
 
 	want, err := loadCSV(*mapFile)
 	if err != nil {
@@ -143,6 +147,17 @@ func loadCSV(fn string) (whitelabel.Routes, error) {
 		return nil, err
 	}
 	return routes, nil
+}
+
+func filterToDomain(in whitelabel.Routes, domain string) whitelabel.Routes {
+	var out = make(whitelabel.Routes)
+	for k, v := range in {
+		ps := strings.Split(k, "@")
+		if domain == ps[1] {
+			out[k] = v
+		}
+	}
+	return out
 }
 
 func splitChanges(mod whitelabel.Routes, limit int) []whitelabel.Routes {
