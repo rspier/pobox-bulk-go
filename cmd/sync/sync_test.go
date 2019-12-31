@@ -52,3 +52,67 @@ func TestFilterToDomain(t *testing.T) {
 		})
 	}
 }
+
+func TestComputeChanges(t *testing.T) {
+
+	rA := &whitelabel.Route{Fwd: "a@a.com"}
+	rB := &whitelabel.Route{Fwd: "b@b.com"}
+	rC := &whitelabel.Route{Fwd: "c@c.com"}
+
+	tests := []struct {
+		desc     string
+		cur, fut whitelabel.Routes
+		want     whitelabel.Routes
+	}{
+		{
+			desc: "empty",
+			cur:  whitelabel.Routes{},
+			fut:  whitelabel.Routes{},
+			want: whitelabel.Routes{},
+		},
+		{
+			desc: "delete",
+			cur:  whitelabel.Routes{"a": rA},
+			fut:  whitelabel.Routes{},
+			want: whitelabel.Routes{"a": nil},
+		},
+		{
+			desc: "delete one",
+			cur:  whitelabel.Routes{"a": rA, "b": rB},
+			fut:  whitelabel.Routes{"b": rB},
+			want: whitelabel.Routes{"a": nil},
+		},
+		{
+			desc: "add",
+			cur:  whitelabel.Routes{},
+			fut:  whitelabel.Routes{"a": rA},
+			want: whitelabel.Routes{"a": rA},
+		},
+		{
+			desc: "add one",
+			cur:  whitelabel.Routes{"c": rC},
+			fut:  whitelabel.Routes{"a": rA, "c": rC},
+			want: whitelabel.Routes{"a": rA},
+		},
+		{
+			desc: "change",
+			cur:  whitelabel.Routes{"a": rA},
+			fut:  whitelabel.Routes{"a": rB},
+			want: whitelabel.Routes{"a": rB},
+		},
+		{
+			desc: "change one",
+			cur:  whitelabel.Routes{"a": rA, "c": rC},
+			fut:  whitelabel.Routes{"a": rB, "c": rC},
+			want: whitelabel.Routes{"a": rB},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			got := computeChanges(tt.cur, tt.fut)
+			if !cmp.Equal(got, tt.want) {
+				t.Errorf("mismatch: -want, +got\n%s", cmp.Diff(tt.want, got))
+			}
+		})
+	}
+}
