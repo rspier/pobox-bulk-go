@@ -17,6 +17,11 @@ var (
 	delim    = flag.String("d", "\t", "output delimiter")
 )
 
+// WhitelabelClient defines the subset of whitelabel.Client we use in this package.
+type WhitelabelClient interface {
+	GetRoutes(context.Context) (whitelabel.Routes, error)
+}
+
 func main() {
 	flag.Parse()
 	defer glog.Flush()
@@ -29,7 +34,7 @@ func main() {
 	ctx, cxl := context.WithTimeout(ctx, *timeout)
 	defer cxl()
 
-	c := whitelabel.Client{User: u, Pass: p}
+	var c WhitelabelClient = &whitelabel.Client{User: u, Pass: p}
 
 	routes, err := c.GetRoutes(ctx)
 	if err != nil {

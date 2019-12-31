@@ -24,6 +24,12 @@ var (
 	delay    = flag.Duration("delay", 2*time.Second, "delay between modifications")
 )
 
+// WhitelabelClient defines the subset of whitelabel.Client we use in this package.
+type WhitelabelClient interface {
+	GetRoutes(context.Context) (whitelabel.Routes, error)
+	SetRoutes(context.Context, whitelabel.Routes) (whitelabel.Routes, error)
+}
+
 func main() {
 	flag.Parse()
 	defer glog.Flush()
@@ -40,7 +46,7 @@ func main() {
 	ctx, cxl := context.WithTimeout(ctx, *timeout)
 	defer cxl()
 
-	c := whitelabel.Client{User: u, Pass: p}
+	var c WhitelabelClient = &whitelabel.Client{User: u, Pass: p}
 
 	have, err := c.GetRoutes(ctx)
 	if err != nil {
